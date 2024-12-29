@@ -4,6 +4,7 @@ from database import get_db
 from models import *
 from services.users import router as users_router
 from services.exercices import router as exercices_router
+from services.workouts import router as workouts_router
 
 app = FastAPI()
 
@@ -18,3 +19,6 @@ app.include_router(users_router)
 
 # Adicionando rotas de exercícios
 app.include_router(exercices_router)
+
+# Adicionando rotas de treinos
+app.include_router(workouts_router)
