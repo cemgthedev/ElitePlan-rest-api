@@ -10,7 +10,7 @@ router = APIRouter()
 
 # Rota para criar um novo exercício
 @router.post("/workouts")
-async def create_user(workout: Workout, db: Session = Depends(get_db)):
+async def create_workout(workout: Workout, db: Session = Depends(get_db)):
     try:
         db.add(workout)
         db.commit()
