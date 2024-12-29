@@ -1,7 +1,7 @@
 # Criar roteador
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
-
+from sqlalchemy.sql import func
 from database import get_db
 from models.user import User
 
@@ -37,5 +37,14 @@ async def get_users(db: Session = Depends(get_db)):
     try:
         users = db.exec(select(User)).all()
         return {"message": "Users found successfully", "data": users}
+    except Exception as e:
+        return {"error": str(e)}
+    
+# Rota para retorno da quantidade de usuários
+@router.get("/quantity/users")
+async def get_users_quantity(db: Session = Depends(get_db)):
+    try:
+        quantity = db.exec(select(func.count()).select_from(User)).first()
+        return {"message": "Users quantity found successfully", "data": str(quantity)}
     except Exception as e:
         return {"error": str(e)}
