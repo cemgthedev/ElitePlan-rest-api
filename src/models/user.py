@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
     from user_plans import UserPlans
@@ -14,4 +14,4 @@ class User(SQLModel, table=True):
     role: str
     email: str
     senha: str
-    plans: list["UserPlans"] = Relationship(back_populates="user")
+    plans: List["UserPlans"] = Relationship(back_populates="user")

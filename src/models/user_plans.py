@@ -13,5 +13,5 @@ class UserPlans(SQLModel, table=True):
     user_id: int = Field(foreign_key="users.id")  # Foreign Key for User
     plan_id: int = Field(foreign_key="plans.id")  # Foreign Key for Plan
     created_at: datetime = Field(default_factory=datetime.now)
-    user: "User" = Relationship(back_populates="user_plans")
-    plan: "Plan" = Relationship(back_populates="user_plans")
+    user: "User" = Relationship(back_populates="plans")
+    plan: "Plan" = Relationship(back_populates="users")

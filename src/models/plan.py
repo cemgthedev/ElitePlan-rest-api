@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from user_plans import UserPlans
@@ -14,5 +14,5 @@ class Plan(SQLModel, table=True):
     type: str
     category: str
     price: float
-    users: list["UserPlans"] = Relationship(back_populates="plan")
-    workouts: list["PlanWorkouts"] = Relationship(back_populates="plan")
+    users: List["UserPlans"] = Relationship(back_populates="plan")
+    workouts: List["PlanWorkouts"] = Relationship(back_populates="plan")
