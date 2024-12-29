@@ -14,7 +14,6 @@ async def create_user(user: User, db: Session = Depends(get_db)):
     try:
         db.add(user)
         db.commit()
-        db.refresh(user)
         return {"message": "User created successfully"}
     except Exception as e:
         db.rollback()
