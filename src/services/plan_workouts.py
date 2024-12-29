@@ -42,3 +42,12 @@ async def get_plan_workout(id: int, db: Session = Depends(get_db)):
         return {"message": "Plan workout found successfully", "data": plan_workout}
     except Exception as e:
         return {"error": str(e)}
+    
+# Rota para listar treinos para planos
+@router.get("/plan_workouts")
+async def get_plan_workouts(db: Session = Depends(get_db)):
+    try:
+        plan_workouts = db.exec(select(PlanWorkouts)).all()
+        return {"message": "Plan workouts found successfully", "data": plan_workouts}
+    except Exception as e:
+        return {"error": str(e)}
