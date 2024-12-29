@@ -1,6 +1,6 @@
 # Criar roteador
 from fastapi import APIRouter, Depends
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from database import get_db
 from models.exercice import Exercice
@@ -18,4 +18,15 @@ async def create_exercice(exercice: Exercice, db: Session = Depends(get_db)):
         return {"message": "Exercice created successfully", "data": exercice}
     except Exception as e:
         db.rollback()
+        return {"error": str(e)}
+    
+# Rota para pegar exercício pelo id
+@router.get("/exercices/{id}")
+async def get_exercice(id: int, db: Session = Depends(get_db)):
+    try:
+        exercice = db.exec(select(Exercice).where(Exercice.id == id)).first()
+        if exercice is None:
+            return {"error": "Exercice not found"}
+        return {"message": "Exercice found successfully", "data": exercice}
+    except Exception as e:
         return {"error": str(e)}
