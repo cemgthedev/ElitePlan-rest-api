@@ -10,7 +10,7 @@ from models.plan_workouts import PlanWorkouts
 # Criar roteador
 router = APIRouter()
 
-# Rota para adicionar um exercício a um treino
+# Rota para adicionar um treino a um plano
 @router.post("/plan_workouts")
 async def create_plan_workout(plan_workout: PlanWorkouts, db: Session = Depends(get_db)):
     try:
