@@ -42,3 +42,12 @@ async def get_workout_exercice(id: int, db: Session = Depends(get_db)):
         return {"message": "Workout exercice found successfully", "data": workout_exercice}
     except Exception as e:
         return {"error": str(e)}
+    
+# Rota para listar exercícios para treino
+@router.get("/workout_exercices")
+async def get_workout_exercices(db: Session = Depends(get_db)):
+    try:
+        workout_exercices = db.exec(select(WorkoutExercices)).all()
+        return {"message": "Workout exercices found successfully", "data": workout_exercices}
+    except Exception as e:
+        return {"error": str(e)}
