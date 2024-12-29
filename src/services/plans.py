@@ -1,6 +1,6 @@
 # Criar roteador
 from fastapi import APIRouter, Depends
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from database import get_db
 from models.plan import Plan
@@ -18,4 +18,15 @@ async def create_plan(plan: Plan, db: Session = Depends(get_db)):
         return {"message": "Plan created successfully", "data": plan}
     except Exception as e:
         db.rollback()
+        return {"error": str(e)}
+    
+# Rota para pegar plano pelo id
+@router.get("/plans/{id}")
+async def get_plan(id: int, db: Session = Depends(get_db)):
+    try:
+        plan = db.exec(select(Plan).where(Plan.id == id)).first()
+        if plan is None:
+            return {"error": "Plan not found"}
+        return {"message": "Plan found successfully", "data": plan}
+    except Exception as e:
         return {"error": str(e)}
