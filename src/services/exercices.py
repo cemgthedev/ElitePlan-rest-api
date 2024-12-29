@@ -14,7 +14,8 @@ async def create_exercice(exercice: Exercice, db: Session = Depends(get_db)):
     try:
         db.add(exercice)
         db.commit()
-        return {"message": "Exercice created successfully"}
+        db.refresh(exercice)
+        return {"message": "Exercice created successfully", "data": exercice}
     except Exception as e:
         db.rollback()
         return {"error": str(e)}

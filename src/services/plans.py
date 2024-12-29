@@ -14,7 +14,8 @@ async def create_plan(plan: Plan, db: Session = Depends(get_db)):
     try:
         db.add(plan)
         db.commit()
-        return {"message": "Plan created successfully"}
+        db.refresh(plan)
+        return {"message": "Plan created successfully", "data": plan}
     except Exception as e:
         db.rollback()
         return {"error": str(e)}
