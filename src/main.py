@@ -8,6 +8,7 @@ from services.workouts import router as workouts_router
 from services.plans import router as plans_router
 from services.workout_exercices import router as workout_exercices_router
 from services.plan_workouts import router as plan_workouts_router
+from services.user_plans import router as user_plans_router
 
 app = FastAPI()
 
@@ -34,3 +35,6 @@ app.include_router(workout_exercices_router)
 
 # Adicionando rotas de treinos para planos
 app.include_router(plan_workouts_router)
+
+# Adicionando rotas de planos para usuários
+app.include_router(user_plans_router)
