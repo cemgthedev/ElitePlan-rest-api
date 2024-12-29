@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from workout_exercices import WorkoutExercices
@@ -13,4 +13,4 @@ class Exercice(SQLModel, table=True):
     n_reps: int
     weight: float
     tutorial_url: str
-    workouts: list["WorkoutExercices"] = Relationship(back_populates="exercice")
+    workouts: List["WorkoutExercices"] = Relationship(back_populates="exercice")

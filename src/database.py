@@ -13,7 +13,4 @@ SQLModel.metadata.create_all(bind=engine)
 # Função para obter uma sessão de banco de dados
 def get_db():
     with Session(engine) as session:
-        try:
-            yield session
-        finally:
-            session.close()
+        yield session

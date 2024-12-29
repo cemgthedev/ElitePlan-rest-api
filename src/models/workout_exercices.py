@@ -13,5 +13,5 @@ class WorkoutExercices(SQLModel, table=True):
     workout_id: int = Field(foreign_key="workouts.id")  # Foreign Key for Workout
     exercice_id: int = Field(foreign_key="exercices.id")    # Foreign Key for Exercice
     created_at: datetime = Field(default_factory=datetime.now)
-    workouts: "Workout" = Relationship(back_populates="workout_exercices")
-    exercices: "Exercice" = Relationship(back_populates="workout_exercices")
+    workout: "Workout" = Relationship(back_populates="exercices")
+    exercice: "Exercice" = Relationship(back_populates="workouts")
