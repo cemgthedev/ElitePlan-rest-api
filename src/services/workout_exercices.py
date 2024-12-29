@@ -31,3 +31,14 @@ async def create_workout_exercice(workout_exercice: WorkoutExercices, db: Sessio
     except Exception as e:
         db.rollback()
         return {"error": str(e)}
+    
+# Rota para pegar exercício para treino pelo id
+@router.get("/workout_exercices/{id}")
+async def get_workout_exercice(id: int, db: Session = Depends(get_db)):
+    try:
+        workout_exercice = db.exec(select(WorkoutExercices).where(WorkoutExercices.id == id)).first()
+        if workout_exercice is None:
+            return {"error": "Workout exercice not found"}
+        return {"message": "Workout exercice found successfully", "data": workout_exercice}
+    except Exception as e:
+        return {"error": str(e)}
