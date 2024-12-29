@@ -1,5 +1,6 @@
 # Criar roteador
 from fastapi import APIRouter, Depends
+from sqlalchemy.sql import func
 from sqlmodel import Session, select
 from datetime import datetime
 from database import get_db
@@ -49,5 +50,14 @@ async def get_workout_exercices(db: Session = Depends(get_db)):
     try:
         workout_exercices = db.exec(select(WorkoutExercices)).all()
         return {"message": "Workout exercices found successfully", "data": workout_exercices}
+    except Exception as e:
+        return {"error": str(e)}
+    
+# Rota para retorno da quantidade de exercícios para treinos
+@router.get("/quantity/workout_exercices")
+async def get_workout_exercices_quantity(db: Session = Depends(get_db)):
+    try:
+        quantity = db.exec(select(func.count()).select_from(WorkoutExercices)).first()
+        return {"message": "Workout exercices quantity found successfully", "data": str(quantity)}
     except Exception as e:
         return {"error": str(e)}
