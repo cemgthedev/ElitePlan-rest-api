@@ -30,3 +30,12 @@ async def get_user(id: int, db: Session = Depends(get_db)):
         return {"message": "User found successfully", "data": user}
     except Exception as e:
         return {"error": str(e)}
+    
+# Rota para listar usuários
+@router.get("/users")
+async def get_users(db: Session = Depends(get_db)):
+    try:
+        users = db.exec(select(User)).all()
+        return {"message": "Users found successfully", "data": users}
+    except Exception as e:
+        return {"error": str(e)}
