@@ -2,7 +2,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from workout_exercices import WorkoutExercice
+    from workout_exercices import WorkoutExercices
 
 # Exercice Entity
 class Exercice(SQLModel, table=True):
@@ -13,4 +13,4 @@ class Exercice(SQLModel, table=True):
     n_reps: int
     weight: float
     tutorial_url: str
-    workout_exercises: list["WorkoutExercice"] = Relationship(back_populates="exercice")
+    workouts: list["WorkoutExercices"] = Relationship(back_populates="exercice")

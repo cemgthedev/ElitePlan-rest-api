@@ -8,10 +8,10 @@ if TYPE_CHECKING:
 
 # WorkoutExercices Entity
 class WorkoutExercices(SQLModel, table=True):
-    __tablename__ = "workout_exercises"  # Table name
+    __tablename__ = "workout_exercices"  # Table name
     id: int = Field(default=None, primary_key=True)
     workout_id: int = Field(foreign_key="workouts.id")  # Foreign Key for Workout
     exercice_id: int = Field(foreign_key="exercices.id")    # Foreign Key for Exercice
     created_at: datetime = Field(default_factory=datetime.now)
-    workout: "Workout" = Relationship(back_populates="workout_exercises")
-    exercice: "Exercice" = Relationship(back_populates="workout_exercises")
+    workouts: "Workout" = Relationship(back_populates="workout_exercices")
+    exercices: "Exercice" = Relationship(back_populates="workout_exercices")

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from plan_workouts import PlanWorkouts
-    from workout_exercices import WorkoutExercice
+    from workout_exercices import WorkoutExercices
 
 # Workout Entity
 class Workout(SQLModel, table=True):
@@ -15,4 +15,4 @@ class Workout(SQLModel, table=True):
     type: str
     category: str
     plans: list["PlanWorkouts"] = Relationship(back_populates="workout")
-    exercises: list["WorkoutExercice"] = Relationship(back_populates="workout")
+    exercices: list["WorkoutExercices"] = Relationship(back_populates="workout")
