@@ -30,3 +30,12 @@ async def get_plan(id: int, db: Session = Depends(get_db)):
         return {"message": "Plan found successfully", "data": plan}
     except Exception as e:
         return {"error": str(e)}
+    
+# Rota para listar planos
+@router.get("/plans")
+async def get_plans(db: Session = Depends(get_db)):
+    try:
+        plans = db.exec(select(Plan)).all()
+        return {"message": "Plans found successfully", "data": plans}
+    except Exception as e:
+        return {"error": str(e)}
