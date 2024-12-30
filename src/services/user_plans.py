@@ -32,6 +32,21 @@ async def create_user_plan(user_plan: UserPlans, db: Session = Depends(get_db)):
         db.rollback()
         return {"error": str(e)}
     
+# Rota para deletar um plano de um usuário
+@router.delete("/user_plans/{id}")
+async def delete_user_plan(id: int, db: Session = Depends(get_db)):
+    try:
+        user_plan = db.exec(select(UserPlans).where(UserPlans.id == id)).first()
+        if user_plan is None:
+            return {"error": "User plan not found"}
+        
+        db.delete(user_plan)
+        db.commit()
+        return {"message": "User plan deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
+    
 # Rota para pegar um plano de um usuário pelo id
 @router.get("/user_plans/{id}")
 async def get_user_plan(id: int, db: Session = Depends(get_db)):
