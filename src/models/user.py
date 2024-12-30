@@ -14,4 +14,4 @@ class User(SQLModel, table=True):
     role: str
     email: str
     password: str
-    plans: List["UserPlans"] = Relationship(back_populates="user")
+    plans: List["UserPlans"] = Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
