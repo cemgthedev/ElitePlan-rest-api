@@ -1,4 +1,3 @@
-# Criar roteador
 from math import ceil
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
