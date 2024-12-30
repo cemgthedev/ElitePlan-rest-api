@@ -13,5 +13,5 @@ class User(SQLModel, table=True):
     cpf: str
     role: str
     email: str
-    senha: str
+    password: str
     plans: List["UserPlans"] = Relationship(back_populates="user")
