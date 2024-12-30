@@ -1,7 +1,8 @@
 # Criar roteador
 from math import ceil
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
-from sqlmodel import Session, select
+from sqlmodel import Session, and_, select
 from sqlalchemy.sql import func
 from database import get_db
 from models.plan import Plan
@@ -72,14 +73,34 @@ async def get_plan(id: int, db: Session = Depends(get_db)):
 async def get_plans(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number, starting from 1"),
-    limit: int = Query(10, ge=1, description="Number of results per page")
+    limit: int = Query(10, ge=1, le=100, description="Number of results per page (max 100)"),
+    title: Optional[str] = Query(None, description="Filter by plan title"),
+    description: Optional[str] = Query(None, description="Filter by plan description"),
+    type: Optional[str] = Query(None, description="Filter by plan type"),
+    category: Optional[str] = Query(None, description="Filter by plan category"),
+    min_price: Optional[float] = Query(None, description="Filter by minimum price"),
+    max_price: Optional[float] = Query(None, description="Filter by maximum price")
 ):
     try:
+        filters = []
+        if title:
+            filters.append(Plan.title.ilike(f"%{title}%"))
+        if description:
+            filters.append(Plan.description.ilike(f"%{description}%"))
+        if type:
+            filters.append(Plan.type == type)
+        if category:
+            filters.append(Plan.category == category)
+        if min_price is not None:
+            filters.append(Plan.price >= min_price)
+        if max_price is not None:
+            filters.append(Plan.price <= max_price)
+
         offset = (page - 1) * limit
-        stmt = select(Plan).offset(offset).limit(limit)
+        stmt = select(Plan).where(and_(*filters)).offset(offset).limit(limit) if filters else select(Plan).offset(offset).limit(limit)
         plans = db.exec(stmt).all()
 
-        total_plans = db.exec(select(func.count()).select_from(Plan)).first()
+        total_plans = db.exec(select(func.count()).select_from(Plan).where(and_(*filters))).first() if filters else db.exec(select(func.count()).select_from(Plan)).first()
         total_pages = ceil(total_plans / limit)
 
         return {
@@ -92,6 +113,7 @@ async def get_plans(
         }
     except Exception as e:
         return {"error": str(e)}
+
     
 # Rota para retorno da quantidade de planos
 @router.get("/quantity/plans")
