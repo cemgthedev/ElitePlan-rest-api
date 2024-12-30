@@ -64,7 +64,7 @@ async def get_plan_workout(id: int, db: Session = Depends(get_db)):
 async def get_plan_workouts(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number, starting from 1"),
-    limit: int = Query(10, ge=1, description="Number of results per page")
+    limit: int = Query(10, ge=1, le=100, description="Number of results per page (max 100)")
 ):
     try:
         offset = (page - 1) * limit
