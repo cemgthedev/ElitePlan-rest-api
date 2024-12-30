@@ -4,6 +4,7 @@ Projeto da disciplina de Desenvolvimento de Software para Persistência. Trata-s
 # Migrações
 - Inicialize o alembic: alembic init alembic
 - No arquivo alembic.ini configure o sqlalchemy.url com as informações do bd. Ex.: postgresql://postgres:12345678@localhost:5432/study
+- No arquivo env.py adicione SQLModel.metadata como valor da variável target_metadata
 - Gere a migração: alembic revision --autogenerate -m "título da migração"
 - Aplique as alterações ao banco de dados: alembic upgrade head
 
