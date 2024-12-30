@@ -1,6 +1,7 @@
 # Criar roteador
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
-from sqlmodel import Session, select
+from sqlmodel import Session, and_, select
 from sqlalchemy.sql import func
 from database import get_db
 from models.user import User
@@ -73,14 +74,29 @@ async def get_user(id: int, db: Session = Depends(get_db)):
 async def get_users(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number, starting from 1"),
-    limit: int = Query(10, ge=1, description="Number of results per page")
+    limit: int = Query(10, ge=1, le=100, description="Number of results per page (max 100)"),
+    name: Optional[str] = Query(None, description="Filter by user name"),
+    min_age: Optional[int] = Query(None, description="Filter by minimum age"),
+    max_age: Optional[int] = Query(None, description="Filter by maximum age"),
+    role: Optional[str] = Query(None, description="Filter by user role")
 ):
     try:
         offset = (page - 1) * limit
-        stmt = select(User).offset(offset).limit(limit)
+
+        filters = []
+        if name:
+            filters.append(User.name.ilike(f"%{name}%"))
+        if min_age is not None:
+            filters.append(User.age >= min_age)
+        if max_age is not None:
+            filters.append(User.age <= max_age)
+        if role:
+            filters.append(User.role == role)
+
+        stmt = select(User).where(and_(*filters)).offset(offset).limit(limit) if filters else select(User).offset(offset).limit(limit)
         users = db.exec(stmt).all()
 
-        total_users = db.exec(select(func.count()).select_from(User)).first()
+        total_users = db.exec(select(func.count()).select_from(User).where(and_(*filters))).first() if filters else db.exec(select(func.count()).select_from(User)).first()
         total_pages = ceil(total_users / limit)
 
         return {
