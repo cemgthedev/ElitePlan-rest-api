@@ -11,6 +11,6 @@ Projeto da disciplina de Desenvolvimento de Software para Persistência. Trata-s
 
 - Criar um ambiente virtual com o seguinte comando: python -m venv .venv
 - Rodar ambiente no prompt de comando do windows: .venv\Scripts\activate
-- Instalar libs: pip install fastapi uvicorn sqlmodel psycopg2 alembic
+- Instalar libs: pip install fastapi uvicorn sqlmodel psycopg2 alembic pyyaml
 - Entrar na pasta src: cd src
 - Executar o servidor com o seguinte comando: uvicorn main:app --reload
