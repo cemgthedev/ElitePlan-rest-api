@@ -1,0 +1,13 @@
+2024-12-30 17:15:02,248 - users - INFO - Criando um novo usuário...
+2024-12-30 17:15:02,262 - users - ERROR - Erro ao criar um novo usuário: (psycopg2.errors.NotNullViolation) ERRO:  o valor nulo na coluna "password" da relação "users" viola a restrição de não-nulo
+DETAIL:  Registro que falhou contém (15, Jsdasdasdasdads, 123.456.789-00, admin, joao.silva@example.com, null, 30).
+
+[SQL: INSERT INTO users (name, age, cpf, role, email, password) VALUES (%(name)s, %(age)s, %(cpf)s, %(role)s, %(email)s, %(password)s) RETURNING users.id]
+[parameters: {'name': 'Jsdasdasdasdads', 'age': 30, 'cpf': '123.456.789-00', 'role': 'admin', 'email': 'joao.silva@example.com', 'password': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2024-12-30 17:15:39,210 - users - INFO - Criando um novo usuário...
+2024-12-30 17:15:39,235 - users - INFO - Usuário criado com sucesso!
+2024-12-30 17:15:57,994 - users - INFO - Buscando usuários...
+2024-12-30 17:15:58,007 - users - INFO - Usuários encontrados com sucesso!
+2024-12-30 17:16:04,322 - users - INFO - Calculando quantidade de usuários...
+2024-12-30 17:16:04,322 - users - INFO - Quantidade de usuários encontrados: 12
