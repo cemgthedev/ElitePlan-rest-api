@@ -20,6 +20,26 @@ async def create_exercice(exercice: Exercice, db: Session = Depends(get_db)):
         db.rollback()
         return {"error": str(e)}
     
+# Rota para atualizar um exercício
+@router.put("/exercices/{id}")
+async def update_exercice(id: int, updated_exercice: Exercice, db: Session = Depends(get_db)):
+    try:
+        exercice = db.exec(select(Exercice).where(Exercice.id == id)).first()
+        if exercice is None:
+            return {"error": "Exercice not found"}
+        exercice.title = updated_exercice.title
+        exercice.n_sections = updated_exercice.n_sections
+        exercice.n_reps = updated_exercice.n_reps
+        exercice.weight = updated_exercice.weight
+        exercice.tutorial_url = updated_exercice.tutorial_url
+        
+        db.commit()
+        db.refresh(exercice)
+        return {"message": "Exercice updated successfully", "data": exercice}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
+    
 # Rota para pegar exercício pelo id
 @router.get("/exercices/{id}")
 async def get_exercice(id: int, db: Session = Depends(get_db)):
