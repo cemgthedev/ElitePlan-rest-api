@@ -13,4 +13,4 @@ class Exercice(SQLModel, table=True):
     n_reps: int
     weight: float
     tutorial_url: str
-    workouts: List["WorkoutExercices"] = Relationship(back_populates="exercice")
+    workouts: List["WorkoutExercices"] = Relationship(back_populates="exercice", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
