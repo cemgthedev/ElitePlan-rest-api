@@ -1,5 +1,6 @@
 # Criar roteador
-from fastapi import APIRouter, Depends
+from math import ceil
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select
 from sqlalchemy.sql import func
 from database import get_db
@@ -68,10 +69,27 @@ async def get_plan(id: int, db: Session = Depends(get_db)):
     
 # Rota para listar planos
 @router.get("/plans")
-async def get_plans(db: Session = Depends(get_db)):
+async def get_plans(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number, starting from 1"),
+    limit: int = Query(10, ge=1, description="Number of results per page")
+):
     try:
-        plans = db.exec(select(Plan)).all()
-        return {"message": "Plans found successfully", "data": plans}
+        offset = (page - 1) * limit
+        stmt = select(Plan).offset(offset).limit(limit)
+        plans = db.exec(stmt).all()
+
+        total_plans = db.exec(select(func.count()).select_from(Plan)).first()
+        total_pages = ceil(total_plans / limit)
+
+        return {
+            "message": "Plans found successfully",
+            "data": plans,
+            "page": page,
+            "limit": limit,
+            "total_plans": total_plans,
+            "total_pages": total_pages
+        }
     except Exception as e:
         return {"error": str(e)}
     
