@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from math import ceil
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.sql import func
 from sqlmodel import Session, select
 from datetime import datetime
@@ -60,10 +61,27 @@ async def get_plan_workout(id: int, db: Session = Depends(get_db)):
     
 # Rota para listar treinos para planos
 @router.get("/plan_workouts")
-async def get_plan_workouts(db: Session = Depends(get_db)):
+async def get_plan_workouts(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number, starting from 1"),
+    limit: int = Query(10, ge=1, description="Number of results per page")
+):
     try:
-        plan_workouts = db.exec(select(PlanWorkouts)).all()
-        return {"message": "Plan workouts found successfully", "data": plan_workouts}
+        offset = (page - 1) * limit
+        stmt = select(PlanWorkouts).offset(offset).limit(limit)
+        plan_workouts = db.exec(stmt).all()
+
+        total_plan_workouts = db.exec(select(func.count()).select_from(PlanWorkouts)).first()
+        total_pages = ceil(total_plan_workouts / limit)
+
+        return {
+            "message": "Plan workouts found successfully",
+            "data": plan_workouts,
+            "page": page,
+            "limit": limit,
+            "total_plan_workouts": total_plan_workouts,
+            "total_pages": total_pages
+        }
     except Exception as e:
         return {"error": str(e)}
     
