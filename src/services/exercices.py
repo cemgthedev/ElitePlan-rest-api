@@ -39,6 +39,21 @@ async def update_exercice(id: int, updated_exercice: Exercice, db: Session = Dep
     except Exception as e:
         db.rollback()
         return {"error": str(e)}
+
+# Rota para deletar um exercício
+@router.delete("/exercices/{id}")
+async def delete_exercice(id: int, db: Session = Depends(get_db)):
+    try:
+        exercice = db.exec(select(Exercice).where(Exercice.id == id)).first()
+        if exercice is None:
+            return {"error": "Exercice not found"}
+        
+        db.delete(exercice)
+        db.commit()
+        return {"message": "Exercice deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
     
 # Rota para pegar exercício pelo id
 @router.get("/exercices/{id}")
