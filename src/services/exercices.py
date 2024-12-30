@@ -1,6 +1,7 @@
 # Criar roteador
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
-from sqlmodel import Session, select
+from sqlmodel import Session, and_, select
 from sqlalchemy.sql import func
 from database import get_db
 from models.exercice import Exercice
@@ -72,14 +73,37 @@ async def get_exercice(id: int, db: Session = Depends(get_db)):
 async def get_exercices(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number, starting from 1"),
-    limit: int = Query(10, ge=1, description="Number of results per page")
+    limit: int = Query(10, ge=1, le=100, description="Number of results per page (max 100)"),
+    title: Optional[str] = Query(None, description="Filter by exercice title"),
+    min_sections: Optional[int] = Query(None, description="Filter by minimum number of sections"),
+    max_sections: Optional[int] = Query(None, description="Filter by maximum number of sections"),
+    min_reps: Optional[int] = Query(None, description="Filter by minimum number of reps"),
+    max_reps: Optional[int] = Query(None, description="Filter by maximum number of reps"),
+    min_weight: Optional[float] = Query(None, description="Filter by minimum weight"),
+    max_weight: Optional[float] = Query(None, description="Filter by maximum weight")
 ):
     try:
+        filters = []
+        if title:
+            filters.append(Exercice.title.ilike(f"%{title}%"))
+        if min_sections is not None:
+            filters.append(Exercice.n_sections >= min_sections)
+        if max_sections is not None:
+            filters.append(Exercice.n_sections <= max_sections)
+        if min_reps is not None:
+            filters.append(Exercice.n_reps >= min_reps)
+        if max_reps is not None:
+            filters.append(Exercice.n_reps <= max_reps)
+        if min_weight is not None:
+            filters.append(Exercice.weight >= min_weight)
+        if max_weight is not None:
+            filters.append(Exercice.weight <= max_weight)
+        
         offset = (page - 1) * limit
-        stmt = select(Exercice).offset(offset).limit(limit)
+        stmt = select(Exercice).where(and_(*filters)).offset(offset).limit(limit) if filters else select(Exercice).offset(offset).limit(limit)
         exercices = db.exec(stmt).all()
 
-        total_exercices = db.exec(select(func.count()).select_from(Exercice)).first()
+        total_exercices = db.exec(select(func.count()).select_from(Exercice).where(and_(*filters))).first() if filters else db.exec(select(func.count()).select_from(Exercice)).first()
         total_pages = ceil(total_exercices / limit)
 
         return {
@@ -87,7 +111,7 @@ async def get_exercices(
             "data": exercices,
             "page": page,
             "limit": limit,
-            "total_users": total_exercices,
+            "total_exercices": total_exercices,
             "total_pages": total_pages
         }
     except Exception as e:
