@@ -20,6 +20,25 @@ async def create_plan(plan: Plan, db: Session = Depends(get_db)):
         db.rollback()
         return {"error": str(e)}
     
+# Rota para atualizar um plano
+@router.put("/plans/{id}")
+async def update_plan(id: int, updated_plan: Plan, db: Session = Depends(get_db)):
+    try:
+        plan = db.exec(select(Plan).where(Plan.id == id)).first()
+        if plan is None:
+            return {"error": "Plan not found"}
+        plan.title = updated_plan.title
+        plan.description = updated_plan.description
+        plan.type = updated_plan.type
+        plan.category = updated_plan.category
+        plan.price = updated_plan.price
+        
+        db.commit()
+        db.refresh(plan)
+        return {"message": "Plan updated successfully", "data": plan}
+    except Exception as e:
+        db.rollback()
+    
 # Rota para pegar plano pelo id
 @router.get("/plans/{id}")
 async def get_plan(id: int, db: Session = Depends(get_db)):
