@@ -1,9 +1,10 @@
 # Criar roteador
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select
 from sqlalchemy.sql import func
 from database import get_db
 from models.user import User
+from math import ceil
 
 # Criar roteador
 router = APIRouter()
@@ -69,10 +70,27 @@ async def get_user(id: int, db: Session = Depends(get_db)):
     
 # Rota para listar usuários
 @router.get("/users")
-async def get_users(db: Session = Depends(get_db)):
+async def get_users(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number, starting from 1"),
+    limit: int = Query(10, ge=1, description="Number of results per page")
+):
     try:
-        users = db.exec(select(User)).all()
-        return {"message": "Users found successfully", "data": users}
+        offset = (page - 1) * limit
+        stmt = select(User).offset(offset).limit(limit)
+        users = db.exec(stmt).all()
+
+        total_users = db.exec(select(func.count()).select_from(User)).first()
+        total_pages = ceil(total_users / limit)
+
+        return {
+            "message": "Users found successfully",
+            "data": users,
+            "page": page,
+            "limit": limit,
+            "total_users": total_users,
+            "total_pages": total_pages
+        }
     except Exception as e:
         return {"error": str(e)}
     
