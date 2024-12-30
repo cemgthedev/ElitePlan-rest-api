@@ -38,6 +38,22 @@ async def update_plan(id: int, updated_plan: Plan, db: Session = Depends(get_db)
         return {"message": "Plan updated successfully", "data": plan}
     except Exception as e:
         db.rollback()
+        return {"error": str(e)}
+    
+# Rota para deletar um plano
+@router.delete("/plans/{id}")
+async def delete_plan(id: int, db: Session = Depends(get_db)):
+    try:
+        plan = db.exec(select(Plan).where(Plan.id == id)).first()
+        if plan is None:
+            return {"error": "Plan not found"}
+        
+        db.delete(plan)
+        db.commit()
+        return {"message": "Plan deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
     
 # Rota para pegar plano pelo id
 @router.get("/plans/{id}")

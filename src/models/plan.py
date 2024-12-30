@@ -14,5 +14,5 @@ class Plan(SQLModel, table=True):
     type: str
     category: str
     price: float
-    users: List["UserPlans"] = Relationship(back_populates="plan")
-    workouts: List["PlanWorkouts"] = Relationship(back_populates="plan")
+    users: List["UserPlans"] = Relationship(back_populates="plan", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    workouts: List["PlanWorkouts"] = Relationship(back_populates="plan", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
