@@ -41,6 +41,21 @@ async def update_user(id: int, updated_user: User, db: Session = Depends(get_db)
         db.rollback()
         return {"error": str(e)}
     
+# Rota para deletar um usuário
+@router.delete("/users/{id}")
+async def delete_user(id: int, db: Session = Depends(get_db)):
+    try:
+        user = db.exec(select(User).where(User.id == id)).first()
+        if user is None:
+            return {"error": "User not found"}
+        
+        db.delete(user)
+        db.commit()
+        return {"message": "User deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
+    
 # Rota para pegar usuário pelo id
 @router.get("/users/{id}")
 async def get_user(id: int, db: Session = Depends(get_db)):
