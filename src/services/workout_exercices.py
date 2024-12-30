@@ -33,6 +33,21 @@ async def create_workout_exercice(workout_exercice: WorkoutExercices, db: Sessio
         db.rollback()
         return {"error": str(e)}
     
+# Rota para remover um exercício de um treino
+@router.delete("/workout_exercices/{id}")
+async def delete_workout_exercice(id: int, db: Session = Depends(get_db)):
+    try:
+        workout_exercice = db.exec(select(WorkoutExercices).where(WorkoutExercices.id == id)).first()
+        if workout_exercice is None:
+            return {"error": "Workout exercice not found"}
+        
+        db.delete(workout_exercice)
+        db.commit()
+        return {"message": "Workout exercice deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
+    
 # Rota para pegar exercício para treino pelo id
 @router.get("/workout_exercices/{id}")
 async def get_workout_exercice(id: int, db: Session = Depends(get_db)):
