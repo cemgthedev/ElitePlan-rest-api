@@ -1,7 +1,8 @@
 # Criar roteador
 from math import ceil
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
-from sqlmodel import Session, select
+from sqlmodel import Session, and_, select
 from sqlalchemy.sql import func
 from database import get_db
 from models.workout import Workout
@@ -72,14 +73,34 @@ async def get_workout(id: int, db: Session = Depends(get_db)):
 async def get_workouts(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number, starting from 1"),
-    limit: int = Query(10, ge=1, description="Number of results per page")
+    limit: int = Query(10, ge=1, le=100, description="Number of results per page (max 100)"),
+    title: Optional[str] = Query(None, description="Filter by workout title"),
+    description: Optional[str] = Query(None, description="Filter by workout description"),
+    min_rest_time: Optional[int] = Query(None, description="Filter by minimum rest time"),
+    max_rest_time: Optional[int] = Query(None, description="Filter by maximum rest time"),
+    type: Optional[str] = Query(None, description="Filter by workout type"),
+    category: Optional[str] = Query(None, description="Filter by workout category")
 ):
     try:
+        filters = []
+        if title:
+            filters.append(Workout.title.ilike(f"%{title}%"))
+        if description:
+            filters.append(Workout.description.ilike(f"%{description}%"))
+        if min_rest_time is not None:
+            filters.append(Workout.rest_time >= min_rest_time)
+        if max_rest_time is not None:
+            filters.append(Workout.rest_time <= max_rest_time)
+        if type:
+            filters.append(Workout.type == type)
+        if category:
+            filters.append(Workout.category == category)
+
         offset = (page - 1) * limit
-        stmt = select(Workout).offset(offset).limit(limit)
+        stmt = select(Workout).where(and_(*filters)).offset(offset).limit(limit) if filters else select(Workout).offset(offset).limit(limit)
         workouts = db.exec(stmt).all()
 
-        total_workouts = db.exec(select(func.count()).select_from(Workout)).first()
+        total_workouts = db.exec(select(func.count()).select_from(Workout).where(and_(*filters))).first() if filters else db.exec(select(func.count()).select_from(Workout)).first()
         total_pages = ceil(total_workouts / limit)
 
         return {
