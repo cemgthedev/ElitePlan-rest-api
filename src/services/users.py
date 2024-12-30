@@ -81,8 +81,6 @@ async def get_users(
     role: Optional[str] = Query(None, description="Filter by user role")
 ):
     try:
-        offset = (page - 1) * limit
-
         filters = []
         if name:
             filters.append(User.name.ilike(f"%{name}%"))
@@ -92,7 +90,8 @@ async def get_users(
             filters.append(User.age <= max_age)
         if role:
             filters.append(User.role == role)
-
+        
+        offset = (page - 1) * limit
         stmt = select(User).where(and_(*filters)).offset(offset).limit(limit) if filters else select(User).offset(offset).limit(limit)
         users = db.exec(stmt).all()
 
