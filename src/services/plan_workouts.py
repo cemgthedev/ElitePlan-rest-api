@@ -31,6 +31,21 @@ async def create_plan_workout(plan_workout: PlanWorkouts, db: Session = Depends(
     except Exception as e:
         db.rollback()
         return {"error": str(e)}
+
+# Rota para deletar um treino de um plano pelo id
+@router.delete("/plan_workouts/{id}")
+async def delete_plan_workout(id: int, db: Session = Depends(get_db)):
+    try:
+        plan_workout = db.exec(select(PlanWorkouts).where(PlanWorkouts.id == id)).first()
+        if plan_workout is None:
+            return {"error": "Plan workout not found"}
+        
+        db.delete(plan_workout)
+        db.commit()
+        return {"message": "Plan workout deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
     
 # Rota para pegar treino para plano pelo id
 @router.get("/plan_workouts/{id}")
