@@ -20,6 +20,27 @@ async def create_user(user: User, db: Session = Depends(get_db)):
         db.rollback()
         return {"error": str(e)}
     
+# Rota para atualizar um usurário
+@router.put("/users/{id}")
+async def update_user(id: int, updated_user: User, db: Session = Depends(get_db)):
+    try:
+        user = db.exec(select(User).where(User.id == id)).first()
+        if user is None:
+            return {"error": "User not found"}
+        user.name = updated_user.name
+        user.age = updated_user.age
+        user.cpf = updated_user.cpf
+        user.role = updated_user.role
+        user.email = updated_user.email
+        user.password = updated_user.password
+        
+        db.commit()
+        db.refresh(user)
+        return {"message": "User updated successfully", "data": user}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
+    
 # Rota para pegar usuário pelo id
 @router.get("/users/{id}")
 async def get_user(id: int, db: Session = Depends(get_db)):
