@@ -1,5 +1,6 @@
 # Criar roteador
-from fastapi import APIRouter, Depends
+from math import ceil
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.sql import func
 from sqlmodel import Session, select
 from datetime import datetime
@@ -61,10 +62,27 @@ async def get_workout_exercice(id: int, db: Session = Depends(get_db)):
     
 # Rota para listar exercícios para treino
 @router.get("/workout_exercices")
-async def get_workout_exercices(db: Session = Depends(get_db)):
+async def get_workout_exercices(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1, description="Page number, starting from 1"),
+    limit: int = Query(10, ge=1, description="Number of results per page")
+):
     try:
-        workout_exercices = db.exec(select(WorkoutExercices)).all()
-        return {"message": "Workout exercices found successfully", "data": workout_exercices}
+        offset = (page - 1) * limit
+        stmt = select(WorkoutExercices).offset(offset).limit(limit)
+        workout_exercices = db.exec(stmt).all()
+
+        total_workout_exercices = db.exec(select(func.count()).select_from(WorkoutExercices)).first()
+        total_pages = ceil(total_workout_exercices / limit)
+
+        return {
+            "message": "Workout exercices found successfully",
+            "data": workout_exercices,
+            "page": page,
+            "limit": limit,
+            "total_workout_exercices": total_workout_exercices,
+            "total_pages": total_pages
+        }
     except Exception as e:
         return {"error": str(e)}
     
