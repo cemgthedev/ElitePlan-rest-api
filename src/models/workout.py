@@ -14,5 +14,5 @@ class Workout(SQLModel, table=True):
     rest_time: int
     type: str
     category: str
-    plans: List["PlanWorkouts"] = Relationship(back_populates="workout")
-    exercices: List["WorkoutExercices"] = Relationship(back_populates="workout")
+    plans: List["PlanWorkouts"] = Relationship(back_populates="workout", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    exercices: List["WorkoutExercices"] = Relationship(back_populates="workout", sa_relationship_kwargs={"cascade": "all, delete-orphan"})

@@ -39,6 +39,21 @@ async def update_workout(id: int, updated_workout: Workout, db: Session = Depend
     except Exception as e:
         db.rollback()
         return {"error": str(e)}
+    
+# Rota para deletar um treino
+@router.delete("/workouts/{id}")
+async def delete_workout(id: int, db: Session = Depends(get_db)):
+    try:
+        workout = db.exec(select(Workout).where(Workout.id == id)).first()
+        if workout is None:
+            return {"error": "Workout not found"}
+        
+        db.delete(workout)
+        db.commit()
+        return {"message": "Workout deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
 
 # Rota para pegar treino pelo id
 @router.get("/workouts/{id}")
