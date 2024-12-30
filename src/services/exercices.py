@@ -1,4 +1,3 @@
-# Criar roteador
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, and_, select
@@ -6,6 +5,7 @@ from sqlalchemy.sql import func
 from database import get_db
 from models.exercice import Exercice
 from math import ceil
+from services.configs import exercices_logger as logger
 
 # Criar roteador
 router = APIRouter()
@@ -14,20 +14,26 @@ router = APIRouter()
 @router.post("/exercices")
 async def create_exercice(exercice: Exercice, db: Session = Depends(get_db)):
     try:
+        logger.info(f"Criando um novo exercício...")
         db.add(exercice)
         db.commit()
         db.refresh(exercice)
+        
+        logger.info(f"Exercício criado com sucesso!")
         return {"message": "Exercice created successfully", "data": exercice}
     except Exception as e:
         db.rollback()
+        logger.error(f"Erro ao criar um novo exercício: {str(e)}")
         return {"error": str(e)}
     
 # Rota para atualizar um exercício
 @router.put("/exercices/{id}")
 async def update_exercice(id: int, updated_exercice: Exercice, db: Session = Depends(get_db)):
     try:
+        logger.info(f"Atualizando exercício com ID: {id}")
         exercice = db.exec(select(Exercice).where(Exercice.id == id)).first()
         if exercice is None:
+            logger.warning(f"Exercício com ID {id} nao encontrado")
             return {"error": "Exercice not found"}
         exercice.title = updated_exercice.title
         exercice.n_sections = updated_exercice.n_sections
@@ -37,35 +43,48 @@ async def update_exercice(id: int, updated_exercice: Exercice, db: Session = Dep
         
         db.commit()
         db.refresh(exercice)
+        
+        logger.info(f"Exercício atualizado com sucesso!")
         return {"message": "Exercice updated successfully", "data": exercice}
     except Exception as e:
         db.rollback()
+        logger.error(f"Erro ao atualizar um exercício: {str(e)}")
         return {"error": str(e)}
 
 # Rota para deletar um exercício
 @router.delete("/exercices/{id}")
 async def delete_exercice(id: int, db: Session = Depends(get_db)):
     try:
+        logger.info(f"Removendo exercício com ID: {id}")
         exercice = db.exec(select(Exercice).where(Exercice.id == id)).first()
         if exercice is None:
+            logger.warning(f"Exercício com ID {id} nao encontrado")
             return {"error": "Exercice not found"}
         
         db.delete(exercice)
         db.commit()
+        
+        logger.info(f"Exercício removido com sucesso!")
         return {"message": "Exercice deleted successfully"}
     except Exception as e:
         db.rollback()
+        logger.error(f"Erro ao remover um exercício: {str(e)}")
         return {"error": str(e)}
     
 # Rota para pegar exercício pelo id
 @router.get("/exercices/{id}")
 async def get_exercice(id: int, db: Session = Depends(get_db)):
     try:
+        logger.info(f"Buscando exercício com ID: {id}")
         exercice = db.exec(select(Exercice).where(Exercice.id == id)).first()
         if exercice is None:
+            logger.warning(f"Exercício com ID {id} nao encontrado")
             return {"error": "Exercice not found"}
+        
+        logger.info(f"Exercício encontrado: {exercice}")
         return {"message": "Exercice found successfully", "data": exercice}
     except Exception as e:
+        logger.error(f"Erro ao buscar um exercício: {str(e)}")
         return {"error": str(e)}
     
 # Rota para listar exercícios
@@ -83,6 +102,7 @@ async def get_exercices(
     max_weight: Optional[float] = Query(None, description="Filter by maximum weight")
 ):
     try:
+        logger.info(f"Buscando exercícios...")
         filters = []
         if title:
             filters.append(Exercice.title.ilike(f"%{title}%"))
@@ -106,6 +126,11 @@ async def get_exercices(
         total_exercices = db.exec(select(func.count()).select_from(Exercice).where(and_(*filters))).first() if filters else db.exec(select(func.count()).select_from(Exercice)).first()
         total_pages = ceil(total_exercices / limit)
 
+        if total_exercices > 0:
+            logger.info(f"Exercícios encontrados com sucesso!")
+        else:
+            logger.warning(f"Nenhum exercício encontrado!")
+            
         return {
             "message": "Exercices found successfully",
             "data": exercices,
@@ -115,13 +140,17 @@ async def get_exercices(
             "total_pages": total_pages
         }
     except Exception as e:
+        logger.error(f"Erro ao buscar exercícios: {str(e)}")
         return {"error": str(e)}
     
 # Rota para retorno da quantidade de exercícios
 @router.get("/quantity/exercices")
 async def get_exercices_quantity(db: Session = Depends(get_db)):
     try:
+        logger.info(f"Calculando quantidade de exercícios...")
         quantity = db.exec(select(func.count()).select_from(Exercice)).first()
+        
+        logger.info(f"Quantidade de exercícios encontrados: {quantity}")
         return {"message": "Exercices quantity found successfully", "data": str(quantity)}
     except Exception as e:
         return {"error": str(e)}
